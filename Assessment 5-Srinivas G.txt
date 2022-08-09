@@ -1,0 +1,104 @@
+Q.1 
+     
+     CREATE TABLE temporary_student
+     AS
+     SELECT *FROM student;
+
+Q.2 
+
+     CREATE TABLE temporary2_student
+     AS
+     SELECT *FROM student where 'A'='B';
+
+Q.3 
+
+     SELECT * from Student S where rownum <=10
+     UNION
+     SELECT * from (Select * from Student S order by rowid desc) where rownum <=10;
+     SELECT MAX(salary), MIN(salary) 
+     FROM employees;
+
+Q.4 
+
+ 
+     Template in action :
+	create table transactions (transaction_id int,user_id int,transaction_date date,store_id int,payment_method varchar(10),amount float)	;
+	insert into transactions(transaction_id, user_id, transaction_date, store_id, payment_method, amount) values
+     (1, 1234, ‘2019–03–02’, 1, 'cash', 5.25),
+     (1, 1234, ‘2019–03–01’, 1, 'credit', 10.75),
+     (1, 1234, ‘2019–03–02’, 2, 'cash', 25.50),
+     (1, 1234, ‘2019–03–03’, 2, 'credit', 17.00),
+     (1, 4321, ‘2019–03–01’, 2, 'cash', 20.00),
+     (1, 4321, ‘2019–03–02’, 2, 'debit', 30.00),
+     (1, 4321, ‘2019–03–03’, 1, 'cash', 3.00);
+		_BASIC_STATS_TEMPLATE = '''
+		select
+    	{{ 
+		dim | sqlsafe 
+	}}
+    		, count(*) as num_transactions
+    		, sum(amount) as total_amount
+    		, avg(amount) as avg_amount
+	    from transactions group by
+    	{{ 
+	    dim | sqlsafe 
+	}}
+	    order by total_amount desc
+	'''
+
+Q.5 
+
+
+     Select * from Students where name like ‘P%’ and surname like ‘S%’;
+
+
+Q.6
+
+
+     Select * from Student where rowid = select max(rowid) from Student;
+
+Q.7 
+
+
+     WITH
+     cteReports (EmpID, FirstName, LastName, MgrID, EmpLevel)
+   AS
+  (
+    SELECT EmployeeID, FirstName, LastName, ManagerID, 1
+    FROM Employees
+    WHERE ManagerID IS NULL
+    UNION ALL
+    SELECT e.EmployeeID, e.FirstName, e.LastName, e.ManagerID, 
+      r.EmpLevel + 1
+    FROM Employees e
+      INNER JOIN cteReports r
+        ON e.ManagerID = r.EmpID
+   )
+     SELECT
+     FirstName + ' ' + LastName AS FullName, 
+     EmpLevel,
+     (SELECT FirstName + ' ' + LastName FROM Employees 
+     WHERE EmployeeID = cteReports.MgrID) AS Manager
+     FROM cteReports 
+     ORDER BY EmpLevel, MgrID
+
+
+Q.8 
+
+
+ 
+     UPDATE TRIGGER : 
+     CREATE TRIGGER ItemUpdate AFTER UPDATE ON Items
+ 	 BEGIN
+   	  IF (New.TotalValue <> OLD.TotalValue) THEN
+       	    UPDATE Sales set value = value - OLD.TotalValue+ New.TotalValue WHERE Order = OLD.Order;
+  	 END 
+                   
+     DELETE TRIGGER :
+
+  	delimiter //
+  	CREATE TRIGGER DelItem AFTER DELETE ON Items
+  	BEGIN
+      	  UPDATE Sales set value = value - OLD.ValueTotal
+       	  WHERE Order = OLD.Order;
+  	END //
